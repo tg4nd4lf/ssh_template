@@ -9,13 +9,16 @@ class SSH:
         self.client_.load_system_host_keys()
         self.client_.set_missing_host_key_policy(paramiko.WarningPolicy)
 
-    def connect_(self):
+    def __repr__(self):
+        return f'SSH: {self.client_}'
+
+    def connect_(self, hostname_=None, port_=None, username_=None, password_=None):
 
         try:
-            self.client_.connect(hostname='192.168.178.63',
-                                 port=22,
-                                 username='userjw',
-                                 password='1q2w3e4r')
+            self.client_.connect(hostname=hostname_,
+                                 port=port_,
+                                 username=username_,
+                                 password=password_)
 
             print("Connect to client ...")
             return self
@@ -66,7 +69,10 @@ class SSH:
 if __name__ == "__main__":
     ssh_client_ = SSH()
 
-    ssh_client_.connect_()
+    ssh_client_.connect_(hostname_='192.168.178.63',
+                         port_=22,
+                         username_='userjw',
+                         password_='1q2w3e4r')
 
     response_ = ssh_client_.exec_command_('hostname -I')
     print(response_)
