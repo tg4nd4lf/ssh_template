@@ -1,5 +1,24 @@
+#!/usr/bin/env python3
+
+# Filename: main.py
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
+""" SSH Class"""
+from typing import List, Any
+
 import paramiko
 from paramiko.ssh_exception import AuthenticationException, SSHException, BadHostKeyException
+
+__author__ = "tg4nd4lf"
+__version__ = "1.0"
 
 
 class SSH:
@@ -12,7 +31,16 @@ class SSH:
     def __repr__(self):
         return f'SSH: {self.client_}'
 
-    def connect_(self, hostname_=None, port_=None, username_=None, password_=None):
+    def connect_(self, hostname_: str = None, port_: int = 22, username_: str = None, password_: str = None) -> paramiko.SSHClient.connect:
+        """
+        Connect to hostname.
+
+        :param hostname_: Hostname/IP of device.
+        :param port_: Port of device. Default: 22.
+        :param username_: Username.
+        :param password_: String.
+        :return:
+        """
 
         try:
             self.client_.connect(hostname=hostname_,
@@ -32,7 +60,13 @@ class SSH:
         except SSHException as err:
             print("Unable to establish SSH connection: %s" % err)
 
-    def exec_command_(self, command_: str):
+    def exec_command_(self, command_: str) -> list[str | bytes | Any]:
+        """
+        Execute command with connection before.
+
+        :param command_: Command as string to be executed.
+        :return:
+        """
 
         try:
             _, stdout, stderr = self.client_.exec_command(command=command_)
@@ -56,25 +90,35 @@ class SSH:
         except SSHException as err:
             print("Unable to execute command: %s" % err)
 
-    def disconnect_(self):
+    def disconnect_(self) -> bool:
+        """
+        Disconnect from device.
+
+        :return: True: Success. False: Failure.
+        """
 
         try:
             self.client_.close()
             print("Connection closed.")
+            return True
 
         except SSHException as err:
             print("Unable to close connection: %s" % err)
+            return False
 
 
 if __name__ == "__main__":
+    # Example
+    import os
+    from dotenv import load_dotenv
+
     ssh_client_ = SSH()
 
-    ssh_client_.connect_(hostname_='192.168.178.63',
-                         port_=22,
-                         username_='userjw',
-                         password_='1q2w3e4r')
+    ssh_client_.connect_(hostname_=os.getenv('HOSTNAME'),
+                         username_=os.getenv('USERNAME'),
+                         password_=os.getenv('PASSWORD'))
 
-    response_ = ssh_client_.exec_command_('hostname -I')
+    response_ = ssh_client_.exec_command_('ls')
     print(response_)
 
     ssh_client_.disconnect_()
