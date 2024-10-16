@@ -12,9 +12,10 @@
 
 
 """ SSH Class"""
-from typing import List, Any
 
 import paramiko
+
+from typing import  Any
 from paramiko.ssh_exception import AuthenticationException, SSHException, BadHostKeyException
 
 __author__ = "tg4nd4lf"
@@ -22,6 +23,23 @@ __version__ = "1.0"
 
 
 class SSH:
+    """
+    # Example
+    import os
+    from dotenv import load_dotenv
+    load_dotenv('../.env')  # Load the environment variables from the .env file
+
+    ssh_client_ = SSH()
+
+    ssh_client_.connect_(hostname_=os.getenv('HOSTNAME'),
+                         username_=os.getenv('USERNAME'),
+                         password_=os.getenv('PASSWORD'))
+
+    response_ = ssh_client_.exec_command_('pwd')
+    print(response_)
+
+    ssh_client_.disconnect_()
+    """
 
     def __init__(self):
         self.client_ = paramiko.SSHClient()
@@ -108,18 +126,4 @@ class SSH:
 
 
 if __name__ == "__main__":
-    # Example
-    import os
-    from dotenv import load_dotenv
-
-    ssh_client_ = SSH()
-
-    ssh_client_.connect_(hostname_=os.getenv('HOSTNAME'),
-                         username_=os.getenv('USERNAME'),
-                         password_=os.getenv('PASSWORD'))
-
-    response_ = ssh_client_.exec_command_('ls')
-    print(response_)
-
-    ssh_client_.disconnect_()
-
+    pass
