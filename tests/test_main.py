@@ -1,11 +1,10 @@
 import unittest
 
-import paramiko
 from paramiko import SSHClient
 from paramiko.ssh_exception import SSHException
 from unittest.mock import MagicMock, patch
 
-from main import SSH
+from src.main import SSH
 
 
 class SSHTest(unittest.TestCase):
