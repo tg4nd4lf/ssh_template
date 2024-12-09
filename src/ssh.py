@@ -15,11 +15,11 @@
 
 import paramiko
 
-from typing import  Any
+from pathlib import Path
 from paramiko.ssh_exception import AuthenticationException, SSHException, BadHostKeyException
 
 __author__ = "tg4nd4lf"
-__version__ = "1.0"
+__version__ = "1.1"
 
 
 class SSH:
@@ -49,22 +49,26 @@ class SSH:
     def __repr__(self):
         return f'SSH: {self.client_}'
 
-    def connect_(self, hostname_: str = None, port_: int = 22, username_: str = None, password_: str = None) -> paramiko.SSHClient.connect:
+    def connect_(self, hostname_: str, username_: str, password_: str = None, key_filename_: Path = None, port_: int = 22) -> paramiko.SSHClient.connect:
         """
         Connect to hostname.
 
         :param hostname_: Hostname/IP of device.
-        :param port_: Port of device. Default: 22.
         :param username_: Username.
         :param password_: String.
+        :param key_filename_: Keyfile.
+        :param port_: Port of device. Default: 22.
         :return:
         """
 
         try:
-            self.client_.connect(hostname=hostname_,
-                                 port=port_,
-                                 username=username_,
-                                 password=password_)
+            self.client_.connect(
+                hostname=hostname_,
+                username=username_,
+                password=password_,
+                key_filename=key_filename_,
+                port=port_
+            )
 
             print("Connect to client ...")
             return self
@@ -78,35 +82,36 @@ class SSH:
         except SSHException as err:
             print("Unable to establish SSH connection: %s" % err)
 
-    def exec_command_(self, command_: str) -> list[str | bytes | Any]:
+    def exec_command_(self, command_: str) -> tuple[list[str], list[str]]:
         """
-        Execute command with connection before.
+        Execute a command on the SSH client and return stdout and stderr.
 
-        :param command_: Command as string to be executed.
-        :return:
+        :param command_: Command to be executed as a string.
+        :return: A tuple containing stdout lines and stderr lines.
         """
-
         try:
+            # Execute the command
             _, stdout, stderr = self.client_.exec_command(command=command_)
 
-            if stdout.channel.exit_status_ready():
-                if stdout.channel.recv_exit_status() == 0:
-                    return stdout.readlines()
+            # Wait for the command to complete
+            exit_status = stdout.channel.recv_exit_status()
 
-                else:
-                    return stderr.readlines()
+            # Read stdout and stderr
+            stdout_lines = stdout.readlines()
+            stderr_lines = stderr.readlines()
 
-            else:
-                while not stdout.channel.exit_status_ready():
-                    if stdout.channel.recv_ready():
-                        if stdout.channel.recv_exit_status() == 0:
-                            return stdout.readlines()
+            if exit_status != 0:
+                print(f"Command '{command_}' exited with status {exit_status}")
+
+            return stdout_lines, stderr_lines
 
         except TimeoutError as err:
-            print("Unable to execute command: %s" % err)
+            print(f"Unable to execute command due to timeout: {err}")
+            return [], [str(err)]
 
         except SSHException as err:
-            print("Unable to execute command: %s" % err)
+            print(f"Unable to execute command due to SSH error: {err}")
+            return [], [str(err)]
 
     def disconnect_(self) -> bool:
         """
