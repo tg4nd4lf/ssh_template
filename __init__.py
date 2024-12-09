@@ -1,1 +1,1 @@
-from src.ssh import *
+from .src.ssh import *
