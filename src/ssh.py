@@ -15,6 +15,7 @@
 
 import paramiko
 
+from socket import timeout, error
 from pathlib import Path
 from paramiko.ssh_exception import AuthenticationException, SSHException, BadHostKeyException
 
@@ -67,20 +68,31 @@ class SSH:
                 username=username_,
                 password=password_,
                 key_filename=key_filename_,
-                port=port_
+                port=port_,
+                timeout = 30
             )
 
             print("Connect to client ...")
             return self
 
-        except AuthenticationException:
-            print("Authentication failed, please verify your credentials: %s")
+        except AuthenticationException as err:
+            print(f"Authentication failed for user '{username_}'. Please verify your credentials.")
 
         except BadHostKeyException as err:
-            print("Unable to verify server's host key: %s" % err)
+            print(f"Unable to verify the server's host key: {err}")
 
         except SSHException as err:
-            print("Unable to establish SSH connection: %s" % err)
+            print(f"SSH connection error: {err}")
+
+        except timeout:
+            print(f"Connection to {hostname_}:{port_} timed out.")
+
+        except error as err:
+            print(f"Socket error while connecting to {hostname_}:{port_}: {err}")
+
+        except Exception as err:
+            print(f"An unexpected error occurred: {err}")
+        return None
 
     def exec_command_(self, command_: str) -> tuple[list[str], list[str]]:
         """
