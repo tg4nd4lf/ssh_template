@@ -63,6 +63,8 @@ class SSH:
         :return:
         """
 
+        print("Connect to client...")
+
         try:
             self.client_.connect(
                 hostname=hostname_,
@@ -73,7 +75,7 @@ class SSH:
                 timeout=timeout_
             )
 
-            print("Connected to client ...")
+            print("Connected to client!")
             return self
 
         except paramiko.AuthenticationException:
